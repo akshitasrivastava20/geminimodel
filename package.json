@@ -1,0 +1,25 @@
+{
+  "name": "geminimodel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akshitasrivastava20/geminimodel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akshitasrivastava20/geminimodel/issues"
+  },
+  "homepage": "https://github.com/akshitasrivastava20/geminimodel#readme",
+  "dependencies": {
+    "@google/genai": "^1.35.0",
+    "express": "^5.2.1"
+  },
+  "type": "module"
+}
