@@ -32,6 +32,32 @@ app.post("/generate",async(req,res)=>{
   res.json({response:response.text})
 })
 
+
+function extractGeminiJSON(response) {
+  // Gemini SDK always returns TEXT, not Response
+  const rawText =
+    typeof response.text === "function"
+      ? response.text()
+      : response?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!rawText) {
+    throw new Error("Empty Gemini response");
+  }
+
+  // Remove markdown code fences
+  const cleaned = rawText
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    console.error("Gemini raw text:", rawText);
+    throw err;
+  }
+}
+
 app.post("/identify-anime",upload.single("image"),async(req,res)=>{
  try {
     if (!req.file) {
@@ -45,7 +71,7 @@ const absolutePath = path.resolve(req.file.path);
 
 
    const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash-preview",
     contents: createUserContent([
       createPartFromUri(myfile.uri, myfile.mimeType),
              `You are an anime expert assistant for an anime streaming platform.
@@ -63,6 +89,7 @@ Analyze the uploaded image and do the following:
    - Confidence level (High / Medium / Low)
 
 Rules:
+-send the response strictly in valid json format
 - Do NOT guess if unsure.
 - Keep the response concise and user-friendly.
 - Do NOT include spoilers.
@@ -76,10 +103,19 @@ Information is provided for discovery purposes only.
 `,
     ]),
   });
+const data = extractGeminiJSON(response);
+ const anime_name=data.anime;
+ const id_response=await fetch(`http://anveshna-backend-v2.vercel.app/meta/anilist/advanced-search?query=${anime_name}`);
+ const id_data = await id_response.json();
+ const id = id_data.results[0].id;
 
+ const data_response=await fetch(`http://anveshna-backend-v2.vercel.app/meta/anilist/data/${id}?provider="gogoanime"`);
+ const media=await data_response.json();
   res.json({
+      id:id,
       success: true,
       result: response.text,
+      media:media
     });
   } catch (error) {
     console.error(error);
