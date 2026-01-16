@@ -71,7 +71,7 @@ const absolutePath = path.resolve(req.file.path);
 
 
    const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-preview",
+    model: "gemini-3-flash-preview",
     contents: createUserContent([
       createPartFromUri(myfile.uri, myfile.mimeType),
              `You are an anime expert assistant for an anime streaming platform.
@@ -81,6 +81,7 @@ Analyze the uploaded image and do the following:
 1. Identify the anime shown in the image.
 2. If you are not confident, clearly say "Unknown anime".
 3. If identified, provide:
+   - anilist id
    - Anime name
    - Short overview (2–3 lines explaining what the anime is about)
    - Total number of episodes (approximate if exact is unknown)
@@ -104,10 +105,11 @@ Information is provided for discovery purposes only.
     ]),
   });
 const data = extractGeminiJSON(response);
- const anime_name=data.anime;
- const id_response=await fetch(`http://anveshna-backend-v2.vercel.app/meta/anilist/advanced-search?query=${anime_name}`);
- const id_data = await id_response.json();
- const id = id_data.results[0].id;
+const id=data.anilist_id;
+//  const anime_name=data.anime;
+//  const id_response=await fetch(`http://anveshna-backend-v2.vercel.app/meta/anilist/advanced-search?query=${anime_name}`);
+//  const id_data = await id_response.json();
+//  const id = id_data.results[0].id;
 
  const data_response=await fetch(`http://anveshna-backend-v2.vercel.app/meta/anilist/data/${id}?provider="gogoanime"`);
  const media=await data_response.json();
